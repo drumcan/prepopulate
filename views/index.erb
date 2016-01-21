@@ -14,11 +14,16 @@
       </p>
       <p>
         <label>Private key</label>
-        <input type="text" name="private_key" id="private_key" value="2632842e6df4fff163c877944980da46"></input>
+        <input type="text" name="private_key" id="private_key" size="32" value="2632842e6df4fff163c877944980da46"></input>
+      </p>
+      <p>
+        <label>Number of transactions to create</label>
+        <input type="text" name="i" id="i" value="10"></input>
       </p>
        <input type="checkbox" name="nonces" value="true" checked> Credit Cards<br>
        <input type="checkbox" name="apple_pay" value="true"> Apple Pay<br>
-       <input type="checkbox" name="android_pay" value="true"> Apple Pay<br>
+       <input type="checkbox" name="android_pay" value="true"> Android Pay<br>
+       <input type="checkbox" name="paypal" value="true"> PayPal<br>
 
       <input class="submit-button" type="submit" />
     </form>

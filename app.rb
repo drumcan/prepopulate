@@ -7,7 +7,9 @@ require 'sinatra'
 NONCES = ["fake-valid-visa-nonce", "fake-valid-amex-nonce", "fake-valid-mastercard-nonce", "fake-valid-discover-nonce", 
           "fake-valid-jcb-nonce", "fake-valid-prepaid-nonce", "fake-valid-commercial-nonce", "fake-valid-durbin-regulated-nonce",
            "fake-valid-debit-nonce", "fake-valid-healthcare-nonce", "fake-valid-payroll-nonce", "fake-valid-country-of-issuance-usa-nonce",
-           "fake-valid-country-of-issuance-cad-nonce", "fake-valid-issuing-bank-network-only-nonce", "fake-paypal-future-nonce"]
+           "fake-valid-country-of-issuance-cad-nonce", "fake-valid-issuing-bank-network-only-nonce"]
+
+PAYPAL_NONCE = ["fake-paypal-future-nonce"]
 
 APPLE_PAY_NONCES = ["fake-apple-pay-amex-nonce", "fake-apple-pay-visa-nonce", "fake-apple-pay-mastercard-nonce"]
 
@@ -32,7 +34,9 @@ post "/prepopulate" do
 	@nonce_array += APPLE_PAY_NONCES
    elsif params[:android_pay] == "true"
 	@nonce_array += ANDROID_PAY_NONCES
-   else
+   elsif params[:paypal] == "true"
+  @nonce_array += PAYPAL_NONCE
+    else
    "You didn't select any nonces to add"
   end
 
@@ -43,11 +47,14 @@ t_config = Braintree::Configuration.new(:environment => :sandbox,
 
 t_gateway = Braintree::Gateway.new(t_config)
 
+@results = Hash.new
+
+
 i = 0
-while i < 50 do
+while i < params[:i].to_i do
  
 #Create new customer id
-  @number = Time.now.to_s.tr('^A-Za-z0-9', '') + rand(1000).to_s
+
 
   result = t_gateway.customer.create(
     :payment_method_nonce => @nonce_array[rand(@nonce_array.length-1)],
@@ -67,17 +74,23 @@ while i < 50 do
       })
 
   if result.success?
-    transaction = t_gateway.transaction.sale(
+ 
+    transaction_response = t_gateway.transaction.sale(
       :amount => "#{rand(3000)}",
   	  :payment_method_token => result.customer.payment_methods[0].token,
   	  :options => {
   		:submit_for_settlement => true
     	})
+      
   else
    p result.message
   end
+  @results["#{transaction_response.transaction.customer_details.id}"] = "#{transaction_response.transaction.id}"
   i +=1
  end
+ 
+ erb :success
+
 end
 
 
